@@ -26,8 +26,8 @@ Font* specialfont;
 int unitflag;
 int delay;
 
-char* apikey = "";
-char* zip;
+char *apikey;
+char *zip;
 
 char city[25];
 char description[25];
@@ -39,7 +39,7 @@ void ekeyboard(Rune k);
 double round(double n);
 int webclone(int *conn);
 void writeurl(int fd, char* url);
-char* readbody(int c);
+char *readbody(int c);
 void polldata(void);
 void mkiconfile(void);
 void timerproc(void *c);
@@ -126,6 +126,8 @@ readbody(int c)
 void
 polldata(void)
 {
+	JSON *obj, *desc, *ico, *temp;
+	JSONEl *arr;
 	char *buf, *u;
 	int conn, ctlfd;
 
@@ -143,10 +145,7 @@ polldata(void)
 	free(u);
 
 	/* Parse the JSON */
-	JSON *desc, *ico, *temp;
-	JSONEl *arr;
-
-	JSON *obj = jsonparse(buf);
+	obj = jsonparse(buf);
 	if(obj == nil)
 		sysfatal("jsonparse: %r");
 
@@ -162,7 +161,9 @@ polldata(void)
 		}
 		if(strcmp(json->name, "main") == 0){
 			if(temp = jsonbyname(json->val, "temp")){
-				snprint(temperature, sizeof temperature, "%d°%s", (int)round(temp->n),
+				snprint(temperature, sizeof temperature, "%s%d°%s",
+					(temp->n > 0 ? "+" : "-"),
+					(int)round(temp->n),
 					(unitflag ? "F" : "C"));
 			}
 		}
@@ -217,7 +218,9 @@ mkiconfile(void)
 	close(ifd);
 
 	if(remove("icon.png") < 0)
-		sysfatal("remove %r");
+		sysfatal("remove png %r");
+	if(remove("icon") < 0)
+		sysfatal("remove icon %r");
 }
 
 void
@@ -290,6 +293,9 @@ threadmain(int argc, char *argv[])
 		break;
 	} ARGEND;
 
+	if(!apikey || !zip)
+		usage();
+
 	if(initdraw(nil, nil, argv0) < 0)
 		sysfatal("initdraw: %r");
 	display->locking = 0;
@@ -306,7 +312,7 @@ threadmain(int argc, char *argv[])
 
 	background = allocimagemix(display, DPalebluegreen, DWhite);
 	specialfont = openfont(display, font);
-	goto poll;
+	goto timer;
 
 	for(;;){
 		switch(alt(alts)){
@@ -319,7 +325,7 @@ threadmain(int argc, char *argv[])
 			eresize();
 			break;
 		case Etimer:
-poll:
+timer:
 			polldata();
 			mkiconfile();
 			redraw();
