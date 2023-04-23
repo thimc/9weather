@@ -1,0 +1,54 @@
+.TH 9WEATHER 1
+.SH NAME
+9weather \- weather forecast
+.SH SYNOPSIS
+.B 9weather
+[
+.I -d delay
+]
+[
+.I -i
+]
+[
+.I -z zip,country
+]
+[
+.I -f font
+]
+[
+.I -k apikey
+]
+.SH DESCRIPTION
+.I 9weather
+makes requests to OpenWeatherMap and such, requires a API key
+in order to be used. You can register and get a free key at
+http://openweathermap.org.
+.PP
+The default delay between each pull is 5 minutes, this can be
+changed by setting the
+.I \-d
+parameter. Note that this delay is in milliseconds.
+.PP
+In order to display the temperature using imperial units add the
+.I \-i
+flag.
+.SH EXAMPLES
+The example below will display the current temperature in Gothenburg
+in metric.
+.PP
+.EX
+9weather -z Göteborg -k my_api_key
+.EE
+.PP
+Here we display the temperature in fahrenheit and we only make a
+request every hour.
+.PP
+.EX
+9weather -z Göteborg -k my_api_key -i -d 360000
+.EE
+.SH SEE ALSO
+.EX
+weather(1)
+.EE
+.SH BUGS
+Probably.
