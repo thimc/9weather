@@ -20,7 +20,7 @@ Image* background;
 Image* csun;
 Font* specialfont;
 
-#define ICONW 100
+#define ICONDIM 100
 #define MAXSIZ 4096
 
 int unitflag;
@@ -110,13 +110,13 @@ writeurl(int fd, char* url)
 char*
 readbody(int c)
 {
-	char buf[256], body[4096];
+	char buf[256], body[MAXSIZ];
 	int fd;
 
 	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
 	if((fd = open(buf, OREAD)) < 0)
 		sysfatal("open %s %r", buf);
-	if(readn(fd, body, 4096) <= 0)
+	if(readn(fd, body, MAXSIZ) <= 0)
 		sysfatal("readn: %r");
 	close(fd);
 
@@ -189,7 +189,7 @@ mkiconfile(void)
 
 	if((f = create("icon.png", OWRITE, 0666)) <= 0)
 		sysfatal("create %r");
-	write(f, body, 4096);
+	write(f, body, MAXSIZ);
 	close(f);
 
 	cmd = malloc(30 * sizeof(char));
@@ -247,10 +247,10 @@ redraw(void)
 	draw(screen, screen->r, background, nil, ZP);
 	p = Pt(screen->r.min.x, screen->r.min.y);
 
-	string(screen, Pt(p.x+ICONW+1, p.y+20), display->black, ZP, display->defaultfont, city);
-	string(screen, Pt(p.x+ICONW+1, p.y+40), display->black, ZP, display->defaultfont, description);
-	string(screen, Pt(p.x+ICONW+1, p.y+60), display->black, ZP, display->defaultfont, temperature);
-	draw(screen, Rect(p.x, p.y, p.x+ICONW, p.y+ICONW), display->transparent, icon, ZP);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+20), display->black, ZP, display->defaultfont, city);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+40), display->black, ZP, display->defaultfont, description);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+60), display->black, ZP, display->defaultfont, temperature);
+	draw(screen, Rect(p.x, p.y, p.x+ICONDIM, p.y+ICONDIM), display->transparent, icon, ZP);
 	flushimage(display, 1);
 }
 
@@ -274,7 +274,7 @@ threadmain(int argc, char *argv[])
 
 	ARGBEGIN {
 	case 'd':
-		delay = atoi(EARGF(usage()));
+		delay = atoi(EARGF(usage())) * 1000;
 		break;
 	case 'f':
 		font = EARGF(usage());

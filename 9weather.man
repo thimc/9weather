@@ -27,7 +27,7 @@ http://openweathermap.org.
 The default delay between each pull is 5 minutes, this can be
 changed by setting the
 .I \-d
-parameter. Note that this delay is in milliseconds.
+parameter. Note that this delay is in seconds.
 .PP
 In order to display the temperature using imperial units add the
 .I \-i
@@ -40,11 +40,11 @@ in metric.
 9weather -z Göteborg -k my_api_key
 .EE
 .PP
-Here we display the temperature in fahrenheit and we only make a
+Here we fetch the temperature in fahrenheit and we only make a
 request every hour.
 .PP
 .EX
-9weather -z Göteborg -k my_api_key -i -d 360000
+9weather -z 'New York' -k my_api_key -i -d 3600
 .EE
 .SH SEE ALSO
 .EX
