@@ -111,14 +111,15 @@ char*
 readbody(int c)
 {
 	char buf[256], body[MAXSIZ];
-	int fd;
+	int n, fd;
 
 	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
 	if((fd = open(buf, OREAD)) < 0)
 		sysfatal("open %s %r", buf);
-	if(readn(fd, body, MAXSIZ) <= 0)
+	if((n = readn(fd, body, MAXSIZ)) <= 0)
 		sysfatal("readn: %r");
 	close(fd);
+	body[n] = '\0';
 
 	return body;
 }
@@ -136,8 +137,7 @@ polldata(void)
 	if(u == nil)
 		sysfatal("malloc: %r");
 
-	snprint(u, 256, "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=%s&mode=json",
-		zip, apikey, (unitflag ? "imperial" : "metric"));
+	snprint(u, 256, "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=%s&mode=json", zip, apikey, (unitflag ? "imperial" : "metric"));
 	ctlfd = webclone(&conn);
 	writeurl(ctlfd, u);
 	buf = readbody(conn);
