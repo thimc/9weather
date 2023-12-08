@@ -175,7 +175,7 @@ void
 mkiconfile(void)
 {
 	char *body, *url, *arg[4], *cmd;
-	int conn, ctlfd, f, pid, ifd;
+	int conn, ctlfd, f, ifd;
 
 	url = malloc(50 * sizeof(char));
 	if(url == nil)
@@ -201,12 +201,15 @@ mkiconfile(void)
 	arg[2] = cmd;
 	arg[3] = nil;
 
-	pid = fork();
-	if(pid == 0){
+	switch(fork()){
+	case -1:
+		sysfatal("fork: %r");
+	case 0:
 		exec("/bin/rc", arg);
-		exits("fork");
+		exits(nil);
+	default:
+		waitpid();
 	}
-	wait();
 	free(cmd);
 
 	if(icon)
