@@ -18,7 +18,7 @@ Keyboardctl *kctl;
 Image* icon;
 Image* background;
 Image* csun;
-Font* specialfont;
+Font* defaultfont;
 
 #define ICONDIM 100
 #define MAXSIZ 4096
@@ -85,7 +85,7 @@ webclone(int *conn)
 
 	if((fd = open("/mnt/web/clone", ORDWR)) < 0)
 		sysfatal("webclone: couldn't open %s: %r", buf);
-	if((n = read(fd, buf, sizeof buf - 1)) < 0)
+	if((n = read(fd, buf, sizeof(buf))) < 0)
 		sysfatal("webclone: reading clone: %r");
 	if(n == 0)
 		sysfatal("webclone: short read on clone");
@@ -115,9 +115,9 @@ readbody(int c)
 
 	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
 	if((fd = open(buf, OREAD)) < 0)
-		sysfatal("open %s %r", buf);
-	if((n = readn(fd, body, MAXSIZ)) <= 0)
-		sysfatal("readn: %r");
+		sysfatal("open: %s: %r", buf);
+	if((n = read(fd, body, sizeof(body))) <= 0)
+		sysfatal("read: %r");
 	close(fd);
 	body[n] = '\0';
 
@@ -188,7 +188,7 @@ mkiconfile(void)
 	close(ctlfd);
 
 	if((f = create("icon.png", OWRITE, 0666)) <= 0)
-		sysfatal("create %r");
+		sysfatal("create: %r");
 	write(f, body, MAXSIZ);
 	close(f);
 
@@ -211,16 +211,15 @@ mkiconfile(void)
 
 	if(icon)
 		freeimage(icon);
-	ifd = open("icon", OREAD);
-	if(ifd < 0)
+	if((ifd = open("icon", OREAD)) < 0)
 		sysfatal("open icon: %r");
 	icon = readimage(display, ifd, 0);
 	close(ifd);
 
 	if(remove("icon.png") < 0)
-		sysfatal("remove png %r");
+		sysfatal("remove png: %r");
 	if(remove("icon") < 0)
-		sysfatal("remove icon %r");
+		sysfatal("remove icon: %r");
 }
 
 void
@@ -247,9 +246,9 @@ redraw(void)
 	draw(screen, screen->r, background, nil, ZP);
 	p = Pt(screen->r.min.x, screen->r.min.y);
 
-	string(screen, Pt(p.x+ICONDIM+1, p.y+20), display->black, ZP, display->defaultfont, city);
-	string(screen, Pt(p.x+ICONDIM+1, p.y+40), display->black, ZP, display->defaultfont, description);
-	string(screen, Pt(p.x+ICONDIM+1, p.y+60), display->black, ZP, display->defaultfont, temperature);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+defaultfont->height), display->black, ZP, defaultfont, city);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+(defaultfont->height*2)), display->black, ZP, defaultfont, description);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+(defaultfont->height*3)), display->black, ZP, defaultfont, temperature);
 	draw(screen, Rect(p.x, p.y, p.x+ICONDIM, p.y+ICONDIM), display->transparent, icon, ZP);
 	flushimage(display, 1);
 }
@@ -270,7 +269,9 @@ threadmain(int argc, char *argv[])
 
 	unitflag = 0;
 	delay = 5 * (60 * 1000);
-	font = "/lib/font/bit/dejavusansbi/unicode.18.font";
+	font = getenv("font");
+	if(font == nil)
+		sysfatal("getenv: no $font set");
 
 	ARGBEGIN {
 	case 'd':
@@ -296,6 +297,9 @@ threadmain(int argc, char *argv[])
 	if(!apikey || !zip)
 		usage();
 
+	if(access(font, AREAD) < 0)
+		sysfatal("access: %s: %r", font);
+
 	if(initdraw(nil, nil, argv0) < 0)
 		sysfatal("initdraw: %r");
 	display->locking = 0;
@@ -311,7 +315,7 @@ threadmain(int argc, char *argv[])
 	proccreate(timerproc, alts[Etimer].c, 1024);
 
 	background = allocimagemix(display, DPalebluegreen, DWhite);
-	specialfont = openfont(display, font);
+	defaultfont = openfont(display, font);
 	goto timer;
 
 	for(;;){
