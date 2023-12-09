@@ -162,7 +162,7 @@ polldata(void)
 		if(strcmp(json->name, "main") == 0){
 			if(temp = jsonbyname(json->val, "temp")){
 				snprint(temperature, sizeof temperature, "%s%d°%s",
-					(temp->n > 0 ? "+" : "-"),
+					(temp->n > 0 ? "+" : ""),
 					(int)round(temp->n),
 					(unitflag ? "F" : "C"));
 			}
