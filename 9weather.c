@@ -85,7 +85,7 @@ webclone(int *conn)
 
 	if((fd = open("/mnt/web/clone", ORDWR)) < 0)
 		sysfatal("webclone: couldn't open %s: %r", buf);
-	if((n = read(fd, buf, sizeof(buf))) < 0)
+	if((n = read(fd, buf, sizeof buf)) < 0)
 		sysfatal("webclone: reading clone: %r");
 	if(n == 0)
 		sysfatal("webclone: short read on clone");
@@ -101,7 +101,7 @@ writeurl(int fd, char* url)
 	char buf[256];
 	int n;
 
-	snprint(buf, sizeof(buf), "url %s", url);
+	snprint(buf, sizeof buf, "url %s", url);
 	n = strlen(buf);
 	if(write(fd, buf, n) != n)
 		sysfatal("write: %r");
@@ -113,11 +113,11 @@ readbody(int c)
 	char buf[256], body[MAXSIZ];
 	int n, fd;
 
-	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
+	snprint(buf, sizeof buf, "/mnt/web/%d/body", c);
 	if((fd = open(buf, OREAD)) < 0)
-		sysfatal("open: %s: %r", buf);
-	if((n = read(fd, body, sizeof(body))) <= 0)
-		sysfatal("read: %r");
+		sysfatal("open %s: %r", buf);
+	if((n = readn(fd, body, sizeof body)) < 0)
+		sysfatal("readn: %r");
 	close(fd);
 	body[n] = '\0';
 
@@ -132,7 +132,6 @@ polldata(void)
 	char *buf, *u;
 	int conn, ctlfd;
 
-	/* Get the API response */
 	u = malloc(sizeof(char) * 256);
 	if(u == nil)
 		sysfatal("malloc: %r");
@@ -144,7 +143,6 @@ polldata(void)
 	close(ctlfd);
 	free(u);
 
-	/* Parse the JSON */
 	obj = jsonparse(buf);
 	if(obj == nil)
 		sysfatal("jsonparse: %r");
@@ -206,7 +204,7 @@ mkiconfile(void)
 		sysfatal("fork: %r");
 	case 0:
 		exec("/bin/rc", arg);
-		exits(nil);
+		sysfatal("exec: %r");
 	default:
 		waitpid();
 	}
@@ -245,14 +243,24 @@ eresize(void)
 void
 redraw(void)
 {
-	Point p;
+	Point p, m;
+	int txtoffset;
+
 	draw(screen, screen->r, background, nil, ZP);
 	p = Pt(screen->r.min.x, screen->r.min.y);
+	m = Pt(screen->r.max.x-p.x, screen->r.max.y-p.y);
+	txtoffset = m.y-(3*defaultfont->height);
 
+	string(screen, Pt(p.x+ICONDIM+1, p.y+(txtoffset/2)), display->black, ZP, defaultfont, city);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+(txtoffset/2)+defaultfont->height), display->black, ZP, defaultfont, description);
+	string(screen, Pt(p.x+ICONDIM+1, p.y+(txtoffset/2)+(defaultfont->height*2)), display->black, ZP, defaultfont, temperature);
+	draw(screen, Rect(p.x, p.y+(m.y/2)-(ICONDIM/2), p.x+ICONDIM, p.y+(m.y/2)+(ICONDIM/2)), display->transparent, icon, ZP);
+/*
 	string(screen, Pt(p.x+ICONDIM+1, p.y+defaultfont->height), display->black, ZP, defaultfont, city);
 	string(screen, Pt(p.x+ICONDIM+1, p.y+(defaultfont->height*2)), display->black, ZP, defaultfont, description);
 	string(screen, Pt(p.x+ICONDIM+1, p.y+(defaultfont->height*3)), display->black, ZP, defaultfont, temperature);
 	draw(screen, Rect(p.x, p.y, p.x+ICONDIM, p.y+ICONDIM), display->transparent, icon, ZP);
+*/
 	flushimage(display, 1);
 }
 
