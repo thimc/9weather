@@ -4,16 +4,13 @@
 .SH SYNOPSIS
 .B 9weather
 [
-.I -d delay
+.I -d seconds
 ]
 [
 .I -i
 ]
 [
 .I -z zip,country
-]
-[
-.I -f font
 ]
 [
 .I -k apikey
@@ -27,11 +24,19 @@ http://openweathermap.org.
 The default delay between each pull is 5 minutes, this can be
 changed by setting the
 .I \-d
-flag. Note that this delay is in seconds.
+flag.
 .PP
 In order to display the temperature using imperial units add the
 .I \-i
 flag.
+.PP
+9weather reads the environment variables
+.B openweathermap
+and
+.B ZIP
+to determine the API key and geolocation, they both can be overwritten
+with the -z and -k flag respectively.
+.EE
 .SH EXAMPLES
 .EX
 9weather -z Stockholm -k my_api_key
