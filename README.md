@@ -7,21 +7,22 @@ weather widget for 9front that uses the [OpenWeatherMap API](https://openweather
 q / Del to quit
 
 ## Usage
-In order to use 9weather you must obtain a free API key from OpenWeatherMap.
 
-	usage: 9weather [-d delay] [-i] [-z zip,country] [-f font] [-k apikey]
+	9weather [ -d seconds ] [ -i ] [ -z zip,country ] [ -k apikey ]
 
-The free plan allows the user to fetch data 2000 times per day which
-should be sufficient for every day use.
+9weather makes requests to OpenWeatherMap and such, requires
+a API key in order to be used. You can register and get a
+free key at http://openweathermap.org.
 
-You need to supply your api key via the `-k` flag.
+The default delay between each pull is 5 minutes, this can
+be changed by setting the `-d` flag.
 
-The default delay between each pull is 5 minutes, this can be changed
-with the `-d` flag.  Note that this delay is in seconds.
+In order to display the temperature using imperial units add
+the `-i` flag.
 
-The default behaviour is to display the temperature in Celsius, this
-can be changed by setting the `-i` flag (for imperial units).
-
+9weather reads the environment variables `openweathermap` and
+`ZIP` to determine the API key and geolocation, they both can
+be overwritten with the `-z` and `-k` flag respectively.
 
 ## License
 MIT
