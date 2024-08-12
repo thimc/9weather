@@ -20,6 +20,8 @@ enum {
 
 Mousectl *mctl;
 Keyboardctl *kctl;
+char *menustr[] = { "exit", 0 };
+Menu menu = { menustr };
 
 Image *background, *icon;
 #define MAXSIZ 4096
@@ -264,6 +266,14 @@ threadmain(int argc, char *argv[])
 		switch(alt(alts)){
 		case Ekeyboard:
 			ekeyboard(k);
+			break;
+		case Emouse:
+			if(m.buttons == 3){
+				switch(menuhit(3, mctl, &menu, nil)){
+				case 0:
+					threadexitsall(nil);
+				}
+			}
 			break;
 		case Eresize:
 			if(getwindow(display, Refnone) < 0)
