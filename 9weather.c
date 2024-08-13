@@ -191,22 +191,35 @@ timerproc(void *c)
 	}
 }
 
+int
+max(int a, int b, int c)
+{
+	return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+}
+
 void
 redraw(void)
 {
-	Point p, m;
-	int txtoffset;
+	Rectangle imgr;
+	Point p;
+	int txtw;
+
+	txtw = max(stringwidth(font, city), stringwidth(font, description), stringwidth(font, temperature)) + font->width;
+
+	imgr = screen->r;
+	imgr.min.x += (Dx(screen->r) - txtw - Imgsize) / 2;
+	imgr.min.y += (Dy(screen->r) - Imgsize) / 2;
+	imgr.max.y = imgr.min.y + Imgsize;
+	imgr.max.x = imgr.min.x + Imgsize;
+
+	p = Pt(imgr.max.x, screen->r.min.y + (Dy(screen->r) - font->height) / 2);
 
 	draw(screen, screen->r, background, nil, ZP);
-	p = Pt(screen->r.min.x, screen->r.min.y);
-	m = Pt(screen->r.max.x-p.x, screen->r.max.y-p.y);
-	txtoffset = m.y-(3*font->height);
+	draw(screen, imgr, icon, nil, ZP);
 
-	string(screen, Pt(p.x+Imgsize+1, p.y+(txtoffset/2)), display->black, ZP, font, city);
-	string(screen, Pt(p.x+Imgsize+1, p.y+(txtoffset/2)+font->height), display->black, ZP, font, description);
-	string(screen, Pt(p.x+Imgsize+1, p.y+(txtoffset/2)+(font->height*2)), display->black, ZP, font, temperature);
-	draw(screen, Rect(p.x, p.y+(m.y/2)-(Imgsize/2), p.x+Imgsize, p.y+(m.y/2)+(Imgsize/2)), icon, nil, ZP);
-
+	string(screen, subpt(p, Pt(0, font->height)), display->black, ZP, font, city);
+	string(screen, p, display->black, ZP, font, description);
+	string(screen, addpt(p, Pt(0, font->height)), display->black, ZP, font, temperature);
 	flushimage(display, 1);
 }
 
