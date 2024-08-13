@@ -146,7 +146,7 @@ mkiconfile(void)
 	body = readbody(conn);
 	close(ctlfd);
 
-	if((f = create("icon.png", OWRITE, 0666)) < 1)
+	if((f = create("icon.png", OWRITE, 0666)) < 0)
 		sysfatal("create: %r");
 	write(f, body, MAXSIZ);
 	close(f);
