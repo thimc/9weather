@@ -37,17 +37,6 @@ usage(void)
 	threadexitsall("usage");
 }
 
-void
-ekeyboard(Rune k)
-{
-	switch(k){
-	case 'q':
-	case Kdel:
-		threadexitsall(nil);
-		break;
-	}
-}
-
 double
 round(double n)
 {
@@ -93,7 +82,7 @@ writeurl(int fd, char* url)
 char*
 readbody(int c)
 {
-	char buf[256], body[4096];
+	char body[4096], buf[256];
 	int n, fd;
 
 	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
@@ -148,7 +137,7 @@ polldata(void)
 void
 mkiconfile(void)
 {
-	char cmd[30], url[50], *arg[4], *body;
+	char url[50], cmd[30], *arg[4], *body;
 	int conn, ctlfd, f, ifd;
 
 	snprint(url, sizeof(url), "http://openweathermap.org/img/wn/%s@2x.png", iconid);
@@ -157,10 +146,11 @@ mkiconfile(void)
 	body = readbody(conn);
 	close(ctlfd);
 
-	if((f = create("icon.png", OWRITE, 0666)) <= 0)
+	if((f = create("icon.png", OWRITE, 0666)) < 1)
 		sysfatal("create: %r");
 	write(f, body, MAXSIZ);
 	close(f);
+	close(conn);
 
 	snprint(cmd, sizeof(cmd), "png -tc icon.png > icon");
 	arg[0] = "rc";
@@ -236,11 +226,21 @@ threadmain(int argc, char *argv[])
 	apikey = getenv("openweathermap");
 	zip = getenv("ZIP");
 	ARGBEGIN{
-	case 'd': delay = atoi(EARGF(usage())) * 1000; break;
-	case 'i': unitflag++; break;
-	case 'k': apikey = EARGF(usage()); break;
-	case 'z': zip = EARGF(usage()); break;
-	case 'h': usage(); break;
+	case 'd': 
+		delay = atoi(EARGF(usage())) * 1000; 
+		break;
+	case 'i': 
+		unitflag++; 
+		break;
+	case 'k': 
+		apikey = EARGF(usage()); 
+		break;
+	case 'z': 
+		zip = EARGF(usage()); 
+		break;
+	case 'h': 
+		usage(); 
+		break;
 	}ARGEND;
 
 	if(!apikey || !zip)
@@ -265,7 +265,12 @@ threadmain(int argc, char *argv[])
 	for(;;){
 		switch(alt(alts)){
 		case Ekeyboard:
-			ekeyboard(k);
+			switch(k){
+			case 'q':
+			case Kdel:
+				threadexitsall(nil);
+				break;
+			}
 			break;
 		case Emouse:
 			if(m.buttons == 3){
