@@ -14,8 +14,9 @@ enum {
 };
 
 enum {
-	Imgsize = 100,		/* images from openweathermap are 100x100 pixels */
 	Delay = 5*(60*1000),	/* default delay is 5 minutes */
+	Imgsize = 100,		/* images from openweathermap are 100x100 pixels */
+	Iconsize = 4096,	/* images are limited to 4kB in file size */
 };
 
 Mousectl *mctl;
@@ -24,7 +25,6 @@ char *menustr[] = { "exit", 0 };
 Menu menu = { menustr };
 
 Image *background, *icon;
-#define MAXSIZ 4096
 
 int delay = Delay, unitflag;
 char *apikey, *zip;
@@ -67,22 +67,10 @@ webclone(int *conn)
 	return fd;
 }
 
-void
-writeurl(int fd, char* url)
-{
-	char buf[256];
-	int n;
-
-	snprint(buf, sizeof(buf), "url %s", url);
-	n = strlen(buf);
-	if(write(fd, buf, n) != n)
-		sysfatal("write: %r");
-}
-
 char*
 readbody(int c)
 {
-	char body[4096], buf[256];
+	char body[Iconsize], buf[256];
 	int n, fd;
 
 	snprint(buf, sizeof(buf), "/mnt/web/%d/body", c);
@@ -107,7 +95,7 @@ polldata(void)
 	snprint(u, sizeof(u), "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=%s&mode=json",
 		zip, apikey, (unitflag ? "imperial" : "metric"));
 	ctlfd = webclone(&conn);
-	writeurl(ctlfd, u);
+	fprint(ctlfd, "url %s\n", u);
 	buf = readbody(conn);
 	close(ctlfd);
 
@@ -142,13 +130,13 @@ mkiconfile(void)
 
 	snprint(url, sizeof(url), "http://openweathermap.org/img/wn/%s@2x.png", iconid);
 	ctlfd = webclone(&conn);
-	writeurl(ctlfd, url);
+	fprint(ctlfd, "url %s\n", url);
 	body = readbody(conn);
 	close(ctlfd);
 
 	if((f = create("icon.png", OWRITE, 0666)) < 0)
 		sysfatal("create: %r");
-	write(f, body, MAXSIZ);
+	write(f, body, Iconsize);
 	close(f);
 	close(conn);
 
