@@ -286,7 +286,7 @@ threadmain(int argc, char *argv[])
 			}
 			break;
 		case Emouse:
-			if(m.buttons == 3){
+			if(m.buttons & 4){
 				switch(menuhit(3, mctl, &menu, nil)){
 				case 0:
 					threadexitsall(nil);
