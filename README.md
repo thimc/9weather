@@ -10,19 +10,21 @@ q / Del to quit
 
 	9weather [ -d seconds ] [ -i ] [ -z zip,country ] [ -k apikey ]
 
-9weather makes requests to OpenWeatherMap and such, requires
-a API key in order to be used. You can register and get a
-free key at http://openweathermap.org.
+9weather retrieves weather data from OpenWeatherMap and
+requires an API key for access.  You can easily obtain a
+free API key by registering at http://openweathermap.org/
 
-The default delay between each pull is 5 minutes, this can
-be changed by setting the `-d` flag.
+By default, 9weather fetches weather data every 5 minutes.
+This interval can be changed by setting the -d flag, fol-
+lowed by the desired delay in seconds.
 
-In order to display the temperature using imperial units add
-the `-i` flag.
+9weather normally displays the temperature in metric units,
+to display in imperial units add the -i flag.
 
-9weather reads the environment variables `openweathermap` and
-`ZIP` to determine the API key and geolocation, they both can
-be overwritten with the `-z` and `-k` flag respectively.
+9weather uses the environment variable openweathermap to
+obtain the API key and ZIP to determine the geolocation,
+they both can be overwritten with -z and -k flag respec-
+tively.
 
 ## License
 MIT
