@@ -5,6 +5,7 @@
 #include <mouse.h>
 #include <keyboard.h>
 #include <json.h>
+#include <auth.h>
 
 enum {
 	Emouse,
@@ -224,7 +225,14 @@ threadmain(int argc, char *argv[])
 		{ nil, nil, CHANEND },
 	};
 
-	apikey = getenv("openweathermap");
+	UserPasswd *apikeyup;
+	apikeyup = auth_getuserpasswd(nil, "proto=pass service=9weather user=openweathermap");
+	if(apikeyup != nil){
+		apikey = apikeyup->passwd;
+	}else{
+		apikey = getenv("openweathermap");
+	}
+
 	zip = getenv("ZIP");
 	ARGBEGIN{
 	case 'd': 
