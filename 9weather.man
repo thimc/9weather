@@ -31,24 +31,28 @@ in imperial units add the
 .I \-i
 flag.
 .PP
-9weather uses the environment variable
-.B openweathermap
-to obtain the API key and
-.B ZIP
-to determine the geolocation, they both can be overwritten
-with  the
-.I \-z
-and
+9weather obtains the API key by default from
+.IR factotum (4).
+You can add an entry like:
+.RS
+key proto=pass service=9weather user=openweathermap !password=my_api_key
+.RE
+If factotum does not contain the key, 9weather will try to read it from
+the environment variable
+.B openweathermap.
+You can also manually specify the API key using the
 .I \-k
-flag respectively.
+flag.
+.PP
+The geolocation ZIP code is obtained from the environment variable
+.B ZIP
+by default. You can manually specify a ZIP code using the
+.I \-z
+flag.
 .EE
 .SH EXAMPLES
 .EX
-9weather -z Stockholm -k my_api_key
-.EE
-.SH SEE ALSO
-.EX
-weather(1)
+9weather -z Shanghai -k my_api_key
 .EE
 .SH BUGS
 Probably.
